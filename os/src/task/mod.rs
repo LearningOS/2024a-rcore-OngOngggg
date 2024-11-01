@@ -20,6 +20,7 @@ use crate::sync::UPSafeCell;
 use lazy_static::*;
 use switch::__switch;
 pub use task::{TaskControlBlock, TaskStatus};
+use crate::config::MAX_SYSCALL_NUM;
 
 pub use context::TaskContext;
 
@@ -54,6 +55,7 @@ lazy_static! {
         let mut tasks = [TaskControlBlock {
             task_cx: TaskContext::zero_init(),
             task_status: TaskStatus::UnInit,
+            syscall_times: [0;MAX_SYSCALL_NUM],
         }; MAX_APP_NUM];
         for (i, task) in tasks.iter_mut().enumerate() {
             task.task_cx = TaskContext::goto_restore(init_app_cx(i));
@@ -135,6 +137,18 @@ impl TaskManager {
             panic!("All applications completed!");
         }
     }
+
+    fn syscall_to_increase(&self, sys_id: usize) {
+        let mut inner = self.inner.exclusive_access();
+        let current = inner.current_task;
+        inner.tasks[current].syscall_times[sys_id] += 1;
+    }
+
+    fn get_syscall_times(&self) -> [u32; MAX_SYSCALL_NUM] {
+        let inner = self.inner.exclusive_access(); //mut is not needed here
+        let current = inner.current_task;
+        inner.tasks[current].syscall_times.clone()
+    }
 }
 
 /// Run the first task in task list.
@@ -168,4 +182,14 @@ pub fn suspend_current_and_run_next() {
 pub fn exit_current_and_run_next() {
     mark_current_exited();
     run_next_task();
+}
+
+/// SysCall's times ++
+pub fn syscall_to_increase(syscall_id: usize) {
+    TASK_MANAGER.syscall_to_increase(syscall_id)
+}
+
+/// get syscall_time through task_manager
+pub fn get_syscall_times() -> [u32; MAX_SYSCALL_NUM] {
+    TASK_MANAGER.get_syscall_times()
 }

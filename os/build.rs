@@ -4,17 +4,17 @@ use std::fs::{read_dir, File};
 use std::io::{Result, Write};
 
 fn main() {
-    println!("cargo:rerun-if-changed=../user/src/");
+    println!("cargo:rerun-if-changed=../ci-user/user/src/");
     println!("cargo:rerun-if-changed={}", TARGET_PATH);
     insert_app_data().unwrap();
 }
 
-static TARGET_PATH: &str = "../user/build/bin/";
+static TARGET_PATH: &str = "../ci-user/user/build/bin/";
 
 /// get app data and build linker
 fn insert_app_data() -> Result<()> {
     let mut f = File::create("src/link_app.S").unwrap();
-    let mut apps: Vec<_> = read_dir("../user/build/bin/")
+    let mut apps: Vec<_> = read_dir("../ci-user/user/build/bin/")
         .unwrap()
         .into_iter()
         .map(|dir_entry| {
