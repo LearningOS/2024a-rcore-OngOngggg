@@ -8,9 +8,19 @@
 
 ​	同样在TCB中设置开始时间，初始为0，在任务第一次调度`run_first_task`/`run_first_task` 设置为系统已执行时间，在调用函数时他与系统执行时间的差即为任务执行时间（不过为什么直接get_time_ms也能过）
 
+
+
 ## 简答作业
 
 1. 正确进入 U 态后，程序的特征还应有：使用 S 态特权指令，访问 S 态寄存器后会报错。 请同学们可以自行测试这些内容（运行 [三个 bad 测例 (ch2b_bad_*.rs)](https://github.com/LearningOS/rCore-Tutorial-Test-2024A/tree/master/src/bin) ）， 描述程序出错行为，同时注意注明你使用的 sbi 及其版本。
+
+	version： `RustSBI version 0.3.0-alpha.2, adapting to RISC-V SBI v1.0.0`
+
+	ch2b_bad_address：日志`[kernel] PageFault in application, bad addr = 0x0, bad instruction = 0x804803a4, kernel killed it.`在0x0地址写入数据访问未映射的地址，引发非法访问
+
+	ch2b_bad_instructions：日志`IllegalInstruction in application, kernel killed it.`在用户态使用sret非法
+
+	ch2b_bad_register：日志`IllegalInstruction in application, kernel killed it.`用户态获取sstatus也是不行的
 
 2. 深入理解 [trap.S](https://github.com/LearningOS/rCore-Camp-Code-2024A/blob/ch3/os/src/trap/trap.S) 中两个函数 `__alltraps` 和 `__restore` 的作用，并回答如下问题:
 
