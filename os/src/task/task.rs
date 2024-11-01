@@ -12,6 +12,8 @@ pub struct TaskControlBlock {
     pub task_cx: TaskContext,
     /// Syscall times
     pub syscall_times: [u32;MAX_SYSCALL_NUM],
+    /// Task start time
+    pub start_time: usize,
 }
 
 /// The status of a task
